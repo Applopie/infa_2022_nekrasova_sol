@@ -2,8 +2,7 @@
 # license: GPLv3
 
 from solar_objects import Star, Planet
-from solar_vis import DrawableObject
-
+import matplotlib.pyplot as plt
 
 def read_space_objects_data_from_file(input_filename):
     """Cчитывает данные о космических объектах из файла, создаёт сами объекты
@@ -13,13 +12,12 @@ def read_space_objects_data_from_file(input_filename):
     """
 
     objects = []
-    with open(input_filename, 'r') as input_file:
+    with open(input_filename) as input_file:
         for line in input_file:
             if len(line.strip()) == 0 or line[0] == '#':
                 continue  # пустые строки и строки-комментарии пропускаем
-
             object_type = line.split()[0].lower()
-            if object_type == "star":
+            if object_type == "star":  # FIXME: do the same for planet
                 star = Star()
                 parse_star_parameters(line, star)
                 objects.append(star)
@@ -30,7 +28,7 @@ def read_space_objects_data_from_file(input_filename):
             else:
                 print("Unknown space object")
 
-    return [DrawableObject(obj) for obj in objects]
+    return objects
 
 
 def parse_star_parameters(line, star):
