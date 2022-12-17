@@ -1,7 +1,5 @@
 # coding: utf-8
 # license: GPLv3
-
-
 class Star:
     """Тип данных, описывающий звезду.
     Содержит массу, координаты, скорость звезды,
@@ -40,6 +38,10 @@ class Star:
 
     image = None
     """Изображение звезды"""
+
+    V_list = []
+
+    d_list = []
 
 
 class Planet:
