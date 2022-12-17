@@ -39,7 +39,9 @@ def execution():
         update_object_position(space, body)
     physical_time += time_step.get()
     displayed_time.set("%.1f" % physical_time + " seconds gone")
-
+    save_statistics(space_objects)
+    if is_one_satellite:
+        make_point(satellite, physical_time, ax_v, ax_r, ax_vr)
     if perform_execution:
         space.after(101 - int(time_speed.get()), execution)
 
@@ -66,6 +68,8 @@ def stop_execution():
     start_button['text'] = "Start"
     start_button['command'] = start_execution
     print('Paused execution.')
+    if is_one_satellite:
+        plt.show()
 
 
 def open_file_dialog():
@@ -75,13 +79,53 @@ def open_file_dialog():
     """
     global space_objects
     global perform_execution
+    global is_one_satellite
+    global satellite
     perform_execution = False
     for obj in space_objects:
         space.delete(obj.image)  # удаление старых изображений планет
     in_filename = askopenfilename(filetypes=(("Text file", ".txt"),))
     space_objects = read_space_objects_data_from_file(in_filename)
     max_distance = max([max(abs(obj.x), abs(obj.y)) for obj in space_objects])
+    print([(obj.x, obj.y) for obj in space_objects])
     calculate_scale_factor(max_distance)
+
+    is_one_satellite = False
+    sattelite = None
+    condition1 = len(space_objects) == 2
+    condition2 = False
+    if condition1:
+        first_two = [space_objects[0].type, space_objects[1].type]
+        if "planet" == first_two[0]:
+            satellite = space_objects[0]
+            condition2 = True
+        elif "planet" == first_two[1]:
+            satellite = space_objects[1]
+            condition2 = True
+        if condition2:
+            if "star" in first_two:
+                is_one_satellite = True
+                global ax_v, ax_r, ax_vr
+
+                ax_v = plt.subplot(311)
+                ax_r = plt.subplot(312)
+                ax_vr = plt.subplot(313)
+
+                ax_v.set_xlabel(r"$t$, с")
+                ax_v.set_ylabel(r"$V, м/с$")
+
+                ax_r.set_xlabel(r"$t$, с")
+                ax_r.set_ylabel(r"$r, м$")
+
+                ax_vr.set_xlabel(r"$r, м$")
+                ax_vr.set_ylabel(r"$V, м/с$")
+
+                ax_r.grid(which='major',
+                          color='k')
+
+                ax_v.grid(which='major', color='k')
+
+                ax_vr.grid(which='major', color='k')
 
     for obj in space_objects:
         if obj.type == 'star':
@@ -112,6 +156,7 @@ def main():
     global space
     global start_button
 
+    clear_statistics()
     print('Modelling started!')
     physical_time = 0
 
